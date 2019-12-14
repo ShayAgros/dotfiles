@@ -1,4 +1,6 @@
+
 (setq inhibit-startup-message t)
+(setq vc-follow-symlinks nil)
 
 (require 'package)
 (setq package-enable-at-startup nil)
@@ -18,8 +20,28 @@
   :config (which-key-mode))
 
 (use-package counsel
-  :ensure t
-  )
+  :ensure t)
+
+(use-package auctex
+ :defer t
+ :ensure t
+ :config
+ (progn
+   (setq TeX-auto-save t) 
+   (setq TeX-parse-self t)
+   (setq TeX-save-query nil)))
+
+(use-package smartparens
+  :ensure t)
+
+(setq TeX-save-query nil)
+;(setq TeX-view-program-selection '(((output-dvi has-no-display-manager)
+ ; "dvi2tty")
+ ;(output-dvi style-pstricks)
+ ; "dvips and gv")
+ ;(output-dvi "xdvi")
+ ;(output-pdf "zathura")
+ ;(output-html "xdg-open")))
 
 (use-package swiper
   :ensure t
@@ -47,13 +69,22 @@
   (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
   )
 
+; Key bindings
+(global-set-key "\M- " 'hippie-expand)
+(global-set-key "\C-ca" 'org-agenda)
+
+(autoload 'notmuch "notmuch" "notmuch mail" t)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(org-agenda-files (quote ("~/TODO.org")))
- '(package-selected-packages (quote (counsel swiper which-key try use-package))))
+ '(org-agenda-files (quote ("~/Multimedia/Calendars/Technion.org")))
+ '(package-selected-packages
+   (quote
+    (notmuch smartparens auctex autex counsel swiper which-key try use-package)))
+ '(send-mail-function (quote mailclient-send-it)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
