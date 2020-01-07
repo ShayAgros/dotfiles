@@ -80,7 +80,9 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(org-agenda-files (quote ("~/Multimedia/Calendars/Technion.org")))
+ '(org-agenda-files
+   (quote
+    ("~/Multimedia/Calendars/Work.org" "~/Multimedia/Calendars/Computer.org" "~/Multimedia/Calendars/Technion.org")))
  '(package-selected-packages
    (quote
     (notmuch smartparens auctex autex counsel swiper which-key try use-package)))
