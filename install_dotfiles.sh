@@ -14,7 +14,7 @@ function install_tmux {
 	ln -s `pwd`/tmux.conf ~/.tmux.conf
 
 	# install tmux plugin manager
-	mkdir -s ~/.tmux/plugins
+	mkdir -p ~/.tmux/plugins
 
 	if [[ ! -d ~/.tmux/plugins/tpm ]]; then
 		git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
@@ -26,7 +26,7 @@ function install_kitty {
 
 	echo configuring kitty
 
-	mkdir ~/.config/kitty
+	mkdir -p ~/.config/kitty
 	ln -s `pwd`/kitty.conf ~/.config/kitty/
 }
 
@@ -34,8 +34,8 @@ function install_kitty {
 function install_font {
 	wget https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/FiraCode.zip
 
-	mkdir -p ~/.local/share/fonts/
-	mv FiraCode.zip ~/.local/share/fonts/FiraCode
+	mkdir -p ~/.local/share/fonts/FiraCode
+	mv FiraCode.zip ~/.local/share/fonts/FiraCode/
 
 	cd ~/.local/share/fonts/FiraCode
 	unzip FiraCode.zip
@@ -45,24 +45,25 @@ function install_font {
 }
 
 # install oh-my-zsh with custom .zshrc
-install zsh {
+function install_zsh {
 	sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-	ln -sf `pwd`/.zshrc ~/.zshrc
+#	ln -sf `pwd`/.zshrc ~/.zshrc
 }
 
-install_zathura {
+function install_zathura {
 	mkdir -p ~/.config/zathura
 
 	cp `pwd`/zathurarc ~/.config/zathura
 }
 
-install_programs kitty tmux emacs neovim wget zip zsh curl zathura fzf
+#install_programs kitty tmux emacs neovim wget zip zsh curl zathura fzf
 
-install_font
-install_kitty
+#install_zsh
+#install_font
+#install_kitty
 install_tmux
-install_zathura
+#install_zathura
 #for file in `ls`; do
 
 	#[[ $file == `basename $0` ]] && continue
