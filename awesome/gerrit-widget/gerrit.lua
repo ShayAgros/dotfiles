@@ -62,8 +62,7 @@ local function worker(args)
 		shape = gears.shape.rounded_rect,
 		border_width = 1,
 		border_color = beautiful.bg_focus,
-		maximum_width = 400,
-		maximum_height = 200,
+		maximum_height = 600,
 		offset = { y = 5 },
 		widget = {}
 	}
@@ -113,7 +112,7 @@ local function worker(args)
 
 	local update_widget = function(widget, stdout, _, _, _)
 		-- remove this later
-		local debug=1
+		local debug=0
 		local reviews = {}
 		if debug == 0 then
 			if stdout == "" then
@@ -165,44 +164,44 @@ local function worker(args)
 		for i = 0, #rows do rows[i]=nil end
 		for i, review in ipairs(reviews) do
 
-			local row = wibox.widget {
-				{
-					{
-						text = "    review number" .. i .. "    ",
-						widget = wibox.widget.textbox,
-					},
-					bottom = 8,
-					top = 8,
-					layout = wibox.container.margin
-				},
-				widget = wibox.container.background
-			}
 			--local row = wibox.widget {
 				--{
 					--{
-						--{
-							--markup = '<b>' .. review.project .. '</b>',
-							--align = 'center',
-							--widget = wibox.widget.textbox
-						--},
-						--{
-							--text = '  ' .. review.subject,
-							--widget = wibox.widget.textbox
-						--},
-						--{
-							--text = '  ' .. get_name_by_user_id(review.owner._account_id),
-							--widget = wibox.widget.textbox
-						--},
-						--vertical_spacing = 10,
-						--layout = wibox.layout.align.vertical
+						--text = "    review number" .. i .. "    ",
+						--widget = wibox.widget.textbox,
 					--},
-					--left = 20,
 					--bottom = 8,
 					--top = 8,
 					--layout = wibox.container.margin
 				--},
 				--widget = wibox.container.background
 			--}
+			local row = wibox.widget {
+				{
+					{
+						{
+							markup = '<b>' .. review.project .. '</b>',
+							align = 'center',
+							widget = wibox.widget.textbox
+						},
+						{
+							text = '  ' .. review.subject,
+							widget = wibox.widget.textbox
+						},
+						{
+							text = '  ' .. get_name_by_user_id(review.owner._account_id),
+							widget = wibox.widget.textbox
+						},
+						vertical_spacing = 10,
+						layout = wibox.layout.align.vertical
+					},
+					left = 20,
+					bottom = 8,
+					top = 8,
+					layout = wibox.container.margin
+				},
+				widget = wibox.container.background
+			}
 
 			row:connect_signal("mouse::enter", function(c) c:set_bg(beautiful.bg_focus) end)
 			row:connect_signal("mouse::leave", function(c) c:set_bg(beautiful.bg_normal) end)

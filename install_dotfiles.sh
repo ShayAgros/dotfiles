@@ -57,12 +57,49 @@ function install_zathura {
 	cp `pwd`/zathurarc ~/.config/zathura
 }
 
+function configure_python {
+
+	echo installing python packages
+	# pip2
+	pip install neovim
+	pip install git-review
+	pip install lxml requests
+	pip install libclang
+	pip install ply
+	pip install gitpython
+
+	#pip3
+	pip3 install neovim
+	pip3 install git-review
+	pip3 install cmake # Ubuntu package is too old
+	pip3 install lxml requests
+	pip3 install libclang
+	pip3 install ply
+	pip3 install gitpython
+}
+
+function configure_perf {
+	cpanm Neovim::Ext
+}
+
+function configure_keyboard {
+	echo configuring keyboard layout and options
+	sudo cp -i ./00-keyboard.conf /etc/X11/xorg.conf.d/00-keyboard.conf
+}
+
+ubuntu_deps=gcc make autoconf automake pkg-config zlib1g-dev node curl python-pip \
+	python3-pip cpanminus perl libxapian-dev libgmime-3.0-dev isync cscope \
+	build-essential texinfo libx11-dev libxpm-dev libjpeg-dev libpng-dev libgif-dev \
+	libtiff-dev libgtk-3-dev libncurses-dev libgnutls28-dev ruby ruby-dev xclip \
+	silversearcher-ag liblua5.3-dev vlc virtualbox-6.1 pavucotrol flameshot \
+	ethtool
+
 #install_programs kitty tmux emacs neovim wget zip zsh curl zathura fzf
 
 #install_zsh
-#install_font
+install_font
 #install_kitty
-install_tmux
+#install_tmux
 #install_zathura
 #for file in `ls`; do
 

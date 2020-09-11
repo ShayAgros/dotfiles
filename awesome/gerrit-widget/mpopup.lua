@@ -103,20 +103,35 @@ end
 
 -- Layout this widget
 function main_widget:layout(context, width, height)
+	self._wb._private.start_offset = self._wb._private.start_offset < 0 and 0 or self._wb._private.start_offset
+	local offset = self._wb._private.start_offset
     if self._private.widget then
         local w, h = wibox.widget.base.fit_widget(
             self,
             context,
             self._private.widget,
             self._wb._private.maximum_width  or 9999,
-            self._wb._private.maximum_height or 9999
+        	9999
         )
 
-        print("widget requested w:", w, "h:", h,"for layout")
+		-- If we scrolled to a point that the end of the widget is visible,
+		-- don't scroll any more
+		if self._wb._private.start_offset + self._wb._private.maximum_height >= h then
+			 self._wb._private.start_offset = h - self._wb._private.maximum_height
+			 offset = self._wb._private.start_offset
+		end
+
+		new_h = h > self._wb._private.maximum_height and self._wb._private.maximum_height or h
         timer.delayed_call(function()
-            apply_size(self._wb, w, h, true)
+            apply_size(self._wb, w, new_h, true)
         end)
-        return { wibox.widget.base.place_widget_at(self._private.widget, 0, -50, width, height) }
+
+		-- ignore offset if widget size is smaller than specified maximum
+		if h > self._wb._private.maximum_height then
+			return { wibox.widget.base.place_widget_at(self._private.widget, 0, -offset, width, self._wb._private.maximum_height + offset) }
+		else
+			return { wibox.widget.base.place_widget_at(self._private.widget, 0, 0, width, self._wb._private.maximum_height) }
+		end
     end
 end
 
@@ -492,8 +507,31 @@ local function create_popup(_, args)
         w.visible = true
     end
 
-	w:connect_signal("button::press",function(m,item,button_id,mod) 
-		print("popup_pressed text preses")
+    local buttons = {}
+    w._private.start_offset = 0
+
+	buttons[4] = function()
+		w._private.start_offset = w._private.start_offset - 6
+
+        -- don't allow negative offset
+		if w._private.start_offset >= 0 then
+			ii:emit_signal("widget::layout_changed")
+			ii:emit_signal("property::widget")
+		else
+			w._private.start_offset = 0
+		end
+	end
+
+	buttons[5] = function()
+		w._private.start_offset = w._private.start_offset + 6
+		ii:emit_signal("widget::layout_changed")
+		ii:emit_signal("property::widget")
+	end
+
+	w:connect_signal("button::press", function(_, _, _, button_id)
+        if buttons[button_id] then
+			buttons[button_id]()
+		end
 	end)
 
     return w
