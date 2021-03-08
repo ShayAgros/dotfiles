@@ -92,7 +92,7 @@ ubuntu_deps=gcc make autoconf automake pkg-config zlib1g-dev node curl python-pi
 	build-essential texinfo libx11-dev libxpm-dev libjpeg-dev libpng-dev libgif-dev \
 	libtiff-dev libgtk-3-dev libncurses-dev libgnutls28-dev ruby ruby-dev xclip \
 	silversearcher-ag liblua5.3-dev vlc virtualbox-6.1 pavucotrol flameshot \
-	ethtool
+	ethtool bear flex bison
 
 #install_programs kitty tmux emacs neovim wget zip zsh curl zathura fzf
 
