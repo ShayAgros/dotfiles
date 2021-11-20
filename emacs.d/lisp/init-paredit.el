@@ -3,11 +3,21 @@
 ;;; Code:
 
 (use-package paredit
-  :ensure t)
+  :ensure
+  :hook (
+	 ((lisp-mode emacs-lisp-mode) .
+	  enable-paredit-mode)
+	 ))
 
-(add-hook 'minibuffer-setup-hook 'enable-paredit-mode)
+;; This should make it work with displaying function's declaration
+;; in mini-buffer
+(require 'eldoc) ; if not already loaded
+(eldoc-add-command
+ 'paredit-backward-delete
+ 'paredit-close-round)
 
-(add-hook 'prog-mode-hook 'paredit-mode)
+;; Don't run par edit mode on mini buffers at all. This is just buggy
+;; (add-hook 'minibuffer-setup-hook (lambda () (paredit-mode 0)))
 
 (provide 'init-paredit)
 ;;; init-paredit.el ends here

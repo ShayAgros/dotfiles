@@ -7,10 +7,97 @@
 ;; Custom functions
 (defun mu4e-apply-to-net-next (msg)
   "Apply `MSG' as a git patch to net-next directory in ~/workspace/net-next"
-    (let ((default-directory "~/workspace/net-next/"))
+  (let ((default-directory "~/workspace/net-next/"))
     (shell-command
-     (format "git am %s"
+     (format "git am -3 %s"
              (shell-quote-argument (mu4e-message-field msg :path))))))
+
+(defun mu4e-headers-mark-thread-using-markpair (markpair &optional subthread)
+  "Mark the thread at point using the given markpair. If SUBTHREAD is
+non-nil, marking is limited to the message at point and its
+descendants."
+  (let* ((mark (car markpair))
+         (allowed-marks (mapcar 'car mu4e-marks)))
+    (unless (memq mark allowed-marks)
+      (mu4e-error "The mark (%s) has to be one of: %s"
+                  mark allowed-marks)))
+  ;; note: the thread id is shared by all messages in a thread
+  (let* ((msg (mu4e-message-at-point))
+         (thread-id (mu4e~headers-get-thread-info msg 'thread-id))
+         (path      (mu4e~headers-get-thread-info msg 'path))
+         (last-marked-point))
+    (mu4e-headers-for-each
+     (lambda (mymsg)
+       (let ((my-thread-id (mu4e~headers-get-thread-info mymsg 'thread-id)))
+         (if subthread
+             ;; subthread matching; mymsg's thread path should have path as its
+             ;; prefix
+             (when (string-match (concat "^" path)
+                                 (mu4e~headers-get-thread-info mymsg 'path))
+               (mu4e-mark-at-point (car markpair) (cdr markpair))
+               (setq last-marked-point (point)))
+           ;; nope; not looking for the subthread; looking for the whole thread
+           (when (string= thread-id my-thread-id)
+             (mu4e-mark-at-point  (car markpair) (cdr markpair))
+             (setq last-marked-point (point)))))))
+    (when last-marked-point
+      (goto-char last-marked-point)
+      (mu4e-headers-next))))
+
+(defun mu4e-goto-next-thread ()
+  "Jump the the next thread"
+  (interactive)
+    (let* ((msg (mu4e-message-at-point))
+	   (thread-id (mu4e~headers-get-thread-info msg 'thread-id)))
+      
+      (mu4e-headers-find-if
+       (lambda (mymsg)
+	 (let ((my-thread-id (mu4e~headers-get-thread-info mymsg 'thread-id)))
+	   (not (string= thread-id my-thread-id))
+	   )
+	 )
+       )
+      )
+    )
+
+(defun mu4e-goto-previous-thread ()
+  "Jump the the previous thread or the head of the current thread"
+  (interactive)
+    (let* ((msg (mu4e-message-at-point))
+	   (thread-id (mu4e~headers-get-thread-info msg 'thread-id)))
+      
+      (mu4e-headers-find-if-next
+       (lambda (mymsg)
+	 (let ((my-thread-id (mu4e~headers-get-thread-info mymsg 'thread-id))
+	       (my-thread-path (mu4e~headers-get-thread-info mymsg 'path)))
+	   (or
+	    (string= my-thread-id my-thread-path)
+	    (and (not (string= thread-id my-thread-id))
+		 (string= my-thread-id my-thread-path)))
+	   )
+	 )
+       ;; search backward
+       t)
+      )
+    )
+
+(defun mu4e-apply-thread-to-net-next ()
+  "Apply a patchset on net-next"
+  (interactive)
+  (let* ((msg mu4e~view-message)
+	 (default-directory "~/workspace/net-next/")
+	 (msgid (mu4e-message-field msg :message-id))
+	 (date (format-time-string mu4e-view-date-format (mu4e-message-field msg :date))))
+    (setq last_commit (shell-command-to-string
+		       (format "git -C %s log -1 --before '%s' --pretty='%s'" default-directory date "%h")
+		       ))
+    
+    (message last_commit)))
+
+(setq last_commit (shell-command-to-string
+		   (format "git -C ~/ena-drivers log -1 --pretty='%s'" "%h")
+		   ))
+(message last_commit)
 
 ;; email configuration functions
 
@@ -39,9 +126,10 @@
 	mail-user-agent 'mu4e-user-agent
 	
 	;; email update configs
-	mu4e-get-mail-command "/home/ANT.AMAZON.COM/shayagr/workspace/scripts/mbsync_all.sh"
-	mu4e-update-interval 180
-	mu4e-headers-auto-update t
+	;mu4e-get-mail-command "/home/ANT.AMAZON.COM/shayagr/workspace/scripts/mbsync_all.sh"
+	mu4e-get-mail-command "echo query > /tmp/query_email"
+	mu4e-update-interval 60
+	mu4e-headers-auto-update nil
 
 	;; email dispaly
 	mu4e-html2text-command "w3m -T text/html"
@@ -75,6 +163,13 @@
 
   (add-to-list 'mu4e-bookmarks
 	       '(
+		 :name  "Linux BPF, unread"
+		 :query "list:bpf.vger.kernel.org AND flag:U"
+		 :key   ?b
+		 ))
+
+  (add-to-list 'mu4e-bookmarks
+	       '(
 		 :name  "work unread messages"
 		 :query "flag:U and maildir:/amazon/*"
 		 :key   ?w))
@@ -90,6 +185,13 @@
 		 :name  "awesome ml"
 		 :query "list:awesome.awesomeWM.github.com"
 		 :key   ?o))
+  
+  (add-to-list 'mu4e-bookmarks
+	       '(
+		 :name  "kernel newbies"
+		 :query "list:kernelnewbies.kernelnewbies.org"
+		 :key   ?n))
+
 
   (add-to-list 'mu4e-bookmarks
 	       '(
@@ -103,13 +205,18 @@
 
 (defun my-mu4e-contact-processor (contact)
   (cond
-   ;; jonh smiht --> John Smith
-   ((string-match "agrosshay@gmail.com" contact)
-    "Shay Agroskin <agrosshay@gmail.com>")
    ;; Remove prod.sim emails
+   ;; e.g. Arthur Kiyanovski <issues+akiyano@prod.sim.a2z.com>
    ((string-match "prod.sim.a2z.com" contact)
     nil)
-   ;; Arthur Kiyanovski <issues+akiyano@prod.sim.a2z.com>
+   ((string-match "sameeh@daynix.com" contact)
+    nil)
+   ((string-match "sameehj@amazon.com" contact)
+    "\"Jubran Samih\" <sameehj@amazon.com>")
+      ;; jonh smiht --> John Smith
+   ((string-match "agrosshay@gmail.com" contact)
+    "Shay Agroskin <agrosshay@gmail.com>")
+
    (t contact)))
 
 ; Vanilla configs
@@ -120,7 +227,7 @@
 
 ;; Receiving side. Mu4e
 
-(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
+(add-to-list 'load-path "/home/ANT.AMAZON.COM/shayagr/workspace/Software/mu/build/mu4e")
 (require 'mu4e)
 
 (configure-mu4e-basic)
@@ -144,32 +251,30 @@
             (set-fill-column 72)
             (flyspell-mode)))
 
-
 ;; colorize patch-based emails
 
 ; mu4e hacks
 
-;; colorize patch emailsn
+;; colorize patch
 (require 'mu4e-patch)
 (add-hook 'mu4e-view-mode-hook #'mu4e-patch-highlight)
 
 ;; Add support for writing emails in org-mode
 
-(require 'org-mu4e)
-(use-package org-mime
-  :ensure t
-  :config
-  (setq org-mu4e-convert-to-html t))
+;; (require 'org-mu4e)
+;; (use-package org-mime
+;;   :config
+;;   (setq org-mu4e-convert-to-html t))
 
-(defun org-mime-org-buffer-htmlize ()
-  "Create an email buffer containing the current org-mode file
-  exported to html and encoded in both html and in org formats as
-  mime alternatives."
-  (interactive)
-  (org-mime-send-buffer 'html)
-  (message-goto-to))
+;; (defun org-mime-org-buffer-htmlize ()
+;;   "Create an email buffer containing the current org-mode file
+;;   exported to html and encoded in both html and in org formats as
+;;   mime alternatives."
+;;   (interactive)
+;;   (org-mime-send-buffer 'html)
+;;   (message-goto-to))
 
-(add-hook 'org-ctrl-c-ctrl-c-hook 'htmlize-and-send t)
+;; (add-hook 'org-ctrl-c-ctrl-c-hook 'htmlize-and-send t)
 
 ;; Add Org mode capture command
 (setq org-capture-templates
@@ -184,6 +289,9 @@
     (setq mu4e-view-use-gnus t))
   (mu4e-view-refresh))
 
+;; Choose contacts using ivy-mode
+;; (require 'mu4e-ivy-contacts)
+
 ;; Set key-bindings
 
 (add-hook 'mu4e-headers-mode-hook
@@ -191,9 +299,56 @@
 	    (local-set-key (kbd "J") (lambda ()
 				       (interactive)
 				       (mu4e-headers-mark-thread nil '(read))))
-	    (local-set-key (kbd "J") (lambda ()
-				       (interactive)
-				       (mu4e-headers-mark-thread nil '(read))))))
+	    (local-set-key (kbd "N") 'mu4e-goto-next-thread)
+	    (local-set-key (kbd "P") 'mu4e-goto-previous-thread)
+	    ))
+
+;; (define-key mu4e-compose-mode-map (kbd "C-c c") 'bjm/ivy-select-and-insert-contact)
+
+;; helm mu - search emails and contants with helm
+(use-package helm-mu
+  :ensure
+  :config
+  (setq helm-mu-append-implicit-wildcard t))
+
+(eval-after-load 'mu4e
+  '(progn
+     (define-key mu4e-view-mode-map (kbd "C-C C-C") 'org-capture)
+     ;; (define-key mu4e-main-mode-map "s" 'helm-mu)
+     ;; (define-key mu4e-headers-mode-map "s" 'helm-mu)
+     ;; (define-key mu4e-view-mode-map "s" 'helm-mu)
+     (define-key mu4e-search-minor-mode-map "s" 'helm-mu))
+  )
+
+;; mu conversations - show threads differently
+;; (straight-use-package 'mu4e-conversation)
+;; (global-mu4e-conversation-mode)
+
+;; OrgMsg
+(straight-use-package
+ '(emacs-htmlize :type git :host github :repo "hniksic/emacs-htmlize"))
+;; (straight-use-pacakge 'emacs-htmlize)
+(straight-use-package 'org-msg)
+(setq org-msg-options "html-postamble:nil H:5 num:nil ^:{} toc:nil author:nil email:nil \\n:t"
+      org-msg-startup "hidestars indent inlineimages"
+      org-msg-greeting-fmt "\nHi %s,\n\n"
+      org-msg-greeting-name-limit 3
+      org-msg-default-alternatives '(text html)
+      org-msg-convert-citation t
+      org-msg-signature "
+
+Thanks,
+#+begin_signature
+Shay
+#+end_signature")
+(setq org-msg-convert-citation t)
+(org-msg-mode)
+
+;; enable inline images
+(setq mu4e-view-show-images t)
+;; use imagemagick, if available
+(when (fboundp 'imagemagick-register-types)
+  (imagemagick-register-types))
 
 (provide 'init-email)
 ;;; init-email.el ends here

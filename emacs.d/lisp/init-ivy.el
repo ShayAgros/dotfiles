@@ -1,6 +1,6 @@
 ;;; init-ivy.el --- Use ivy for minibuffer completion and more -*- lexical-binding: t -*-
 ;;; Commentary:
-;;; Code:
+ ;;; Code:
 
 (use-package ivy
   :ensure t
@@ -9,7 +9,7 @@
   (setq-default ivy-initial-inputs-alist '())
   :config
   (setq-default
-   ivy-use-virtual-buffers t
+   ;; ivy-use-virtual-buffers t
    ivy-virtual-abbreviate 'fullpath
    ivy-count-format ""
    ivy-magic-tilde nil
@@ -51,7 +51,6 @@
   ;; commands other than xref-find-definitions (e.g. project-find-regexp)
   ;; as well
   (setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
-
 
 (provide 'init-ivy)
 ;;; init-ivy.el ends here

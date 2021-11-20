@@ -7,6 +7,10 @@
 
 (use-package company
   :ensure t
+  :custom
+  (company-idle-delay 0) ;; complete right away
+  (company-show-number t)
+  (company-tooltip-limit 10)
   :config
   (define-key company-mode-map (kbd "M-/") 'company-complete)
   (define-key company-active-map (kbd "M-/") 'company-other-backend)
@@ -34,6 +38,20 @@
 
     (add-hook 'company-completion-started-hook 'sanityinc/page-break-lines-disable)
     (add-hook 'company-after-completion-hook 'sanityinc/page-break-lines-maybe-reenable)))
+
+(defun mars/company-backend-with-yas (backends)
+      "Add :with company-yasnippet to company BACKENDS.
+Taken from https://github.com/syl20bnr/spacemacs/pull/179."
+      (if (and (listp backends) (memq 'company-yasnippet backends))
+	  backends
+	(append (if (consp backends)
+		    backends
+		  (list backends))
+		'(:with company-yasnippet))))
+
+;; add yasnippet to all backends
+(setq company-backends
+      (mapcar #'mars/company-backend-with-yas company-backends))
 
 (provide 'init-company)
 ;;; init-company.el ends here

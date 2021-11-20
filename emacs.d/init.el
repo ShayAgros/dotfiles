@@ -24,26 +24,83 @@
 (when (file-exists-p custom-file)
   (load custom-file))
 
-; Load emacs packages
+;; Save emacs information between sessions
+(setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring projectile-project-command-history))
+(setq savehist-file "~/.emacs.d/tmp/savehist")
+(savehist-mode 1)
+
+;; Stop making backup files in the same directory
+(setq backup-directory-alist '((".*" . "~/.emacs.d/backups/")))
+(setq backup-by-copying t)
+(setq delete-old-versions t
+  kept-new-versions 6
+  kept-old-versions 2
+  version-control t)
+
+;; Stop making auto-save files in the same directory
+(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/autosaves/\\1" t)))
+
+;; check spelling by default
+(flyspell-mode)
+
+;; Don't truncate eval output in echo area
+(setq eval-expression-print-length nil)
+
+;; Remember file location
+(require 'saveplace)
+(save-place-mode)
+
+;; Push clipboard into kill ring before pushing a new value to it
+(setq save-interprogram-paste-before-kill t)
+
+;; Push kill ring content to clipboard
+(setq x-select-enable-clipboard t)
+
+;; Load emacs packages
 
 ;; Basic packages (which aren't used by others) 
-;;; configure MELPA
+;; configure MELPA
 (require 'pkg-mng)
-;;; gruvbox theme
+;; gruvbox theme
 (require 'theme-cfg)
-;;; setup flyspell
+;; setup flyspell
 (require 'init-spelling)
-;;; init ivy completion (loads counsel and ivy-xref)
+;; init ivy completion (loads counsel and ivy-xref)
 (require 'init-ivy)
-;;; init par edit (auto closing paranthesis and stuff)
+(require 'init-helm)
+;; init par edit (auto closing paranthesis and stuff)
 ;; http://mumble.net/~campbell/emacs/paredit.html
 (require 'init-paredit)
-;; Init completion engine
-(require 'init-company)
 ;; parentheses highlighting and stuff
 (require 'init-highlighting)
+;; project management
+(require 'init-projectile)
+;; display avialable keys
+(require 'init-which-key)
+;; setup git integration
+(require 'init-git)
+;; setup try package (allows to try a package)
+(require 'init-try)
+;; setup json
+;; (require 'init-json)
+
+;; Completion engine. Backends should come before completion engine
+;; initialization
+
+;;; setup language server
+(require 'init-lsp)
+;;; setup snippets
+(require 'init-snippets)
+;;; Init completion engine
+;; (require 'init-company)
 
 ;; Advance packges (which require the basic packages to be loaded)
 
-;;; email mu4e + mbsync
+;; email mu4e + mbsync
 (require 'init-email)
+
+(require 'init-c)
+;; Initialize all python related configurations
+(require 'init-python)
+;; An emacs framework to save recently opened files
+(require 'init-recentf)
