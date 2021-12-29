@@ -9,6 +9,7 @@ get_ssh_connection() {
 		return
 	fi
 
+	ssh_login=$(echo ${ssh_login} | sed 's/[^@]\+@\([^@]\+\)/\1/')
 	ssh_entry=$(awk "/\y${ssh_login}\y/ {print NR}" ~/saved_instances/saved_logins)
 
 	if [[ -n ${ssh_entry} ]]; then

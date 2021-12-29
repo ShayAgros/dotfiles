@@ -9,6 +9,7 @@ get_ssh_connection() {
 	if [[ -z ${ssh_login} ]]; then
 		echo ${current_dir}
 	else
+		ssh_login=$(echo ${ssh_login} | sed 's/[^@]\+@\([^@]\+\)/\1/')
 		ssh_entry=$(awk "/\y${ssh_login}\y/ {print NR}" ~/saved_instances/saved_logins)
 
 		if [[ -z ${ssh_entry} ]]; then
