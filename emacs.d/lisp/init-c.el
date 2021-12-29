@@ -47,11 +47,6 @@
 
 ;; (remove-hook 'python-mode-hook 'wisent-python-default-setup)
 
-;; CEDET (emacs native support for C projects). This currently doesn't work well with LSP
-;; You need to either choose between them of find a way to integrate both
-
-(global-ede-mode 1)
-
 ;; (require 'cc-mode)
 ;; (require 'semantic)
 ;; (global-semanticdb-minor-mode 1)
@@ -111,6 +106,16 @@
                                        filename))
                 (setq indent-tabs-mode t)
                 (setq show-trailing-whitespace t)
-                (c-set-style "linux-tabs-only")))))
+                (c-set-style "linux-tabs-only"))
+	      ;; CEDET (emacs native support for C projects). This currently doesn't work well with LSP
+	      ;; You need to either choose between them of find a way to integrate both
+	      (global-ede-mode))))
+
+;; remap ede key bidning to C-c e since C-c . is already used by org mode, and it is a headache to
+;; make it work for each mode
+(with-eval-after-load 'ede
+  (define-key ede-minor-mode-map (kbd "C-c e")
+    (lookup-key ede-minor-mode-map (kbd "C-c .")))
+  (define-key ede-minor-mode-map (kbd "C-c .") nil))
 
 (provide 'init-c)

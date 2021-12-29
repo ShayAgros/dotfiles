@@ -13,6 +13,10 @@
 ;; Ask y or n instead of yes-or-no everywhere
 (defalias 'yes-or-no-p 'y-or-n-p)
 
+;; This should stop flickering in terminal mode.
+;; It seems kinda important but I can't find why
+(setq recenter-redisplay nil)
+
 ;; remove toolbar in gui mode
 (tool-bar-mode -1)
 
@@ -55,8 +59,10 @@
 
 ;; Push kill ring content to clipboard
 (setq x-select-enable-clipboard t)
-
 ;; Load emacs packages
+
+;; Make buffer re-read from disk automatically
+(global-auto-revert-mode)
 
 ;; Basic packages (which aren't used by others) 
 ;; configure MELPA
@@ -92,7 +98,7 @@
 ;;; setup snippets
 (require 'init-snippets)
 ;;; Init completion engine
-;; (require 'init-company)
+(require 'init-company)
 
 ;; Advance packges (which require the basic packages to be loaded)
 
@@ -104,3 +110,5 @@
 (require 'init-python)
 ;; An emacs framework to save recently opened files
 (require 'init-recentf)
+;; Org more settings (org-agenda and org-capture as well)
+(require 'init-org)

@@ -47,18 +47,18 @@ descendants."
 (defun mu4e-goto-next-thread ()
   "Jump the the next thread"
   (interactive)
-    (let* ((msg (mu4e-message-at-point))
-	   (thread-id (mu4e~headers-get-thread-info msg 'thread-id)))
+  (let* ((msg (mu4e-message-at-point))
+	 (thread-id (mu4e~headers-get-thread-info msg 'thread-id)))
       
-      (mu4e-headers-find-if
-       (lambda (mymsg)
-	 (let ((my-thread-id (mu4e~headers-get-thread-info mymsg 'thread-id)))
-	   (not (string= thread-id my-thread-id))
-	   )
+    (mu4e-headers-find-if
+     (lambda (mymsg)
+       (let ((my-thread-id (mu4e~headers-get-thread-info mymsg 'thread-id)))
+	 (not (string= thread-id my-thread-id))
 	 )
        )
-      )
+     )
     )
+  )
 
 (defun mu4e-goto-previous-thread ()
   "Jump the the previous thread or the head of the current thread"
@@ -87,10 +87,11 @@ descendants."
   (let* ((msg mu4e~view-message)
 	 (default-directory "~/workspace/net-next/")
 	 (msgid (mu4e-message-field msg :message-id))
-	 (date (format-time-string mu4e-view-date-format (mu4e-message-field msg :date))))
-    (setq last_commit (shell-command-to-string
-		       (format "git -C %s log -1 --before '%s' --pretty='%s'" default-directory date "%h")
-		       ))
+	 (date (format-time-string mu4e-headers-long-date-format (mu4e-message-field msg :date))))
+    ;; (setq last_commit (shell-command-to-string
+		       ;; (format "git -C %s log -1 --before '%s' --pretty='%s'" default-directory date "%h"))
+
+    ;; (shell-command)
     
     (message last_commit)))
 
@@ -195,26 +196,29 @@ descendants."
 
   (add-to-list 'mu4e-bookmarks
 	       '(
-		 :name  "unread"
-		 :query "flag:u"
+		 :name  "gmail unread messages"
+		 :query "maildir:/gmail/ flag:u not flag:list"
 		 :key ?u)))
 
 (defun configure-mu4e-actions ()
   (add-to-list 'mu4e-view-actions '("ViewInBrowser" . mu4e-action-view-in-browser) t)
-  (add-to-list 'mu4e-view-actions '("apply to net-next" . mu4e-apply-to-net-next) t))
+  (add-to-list 'mu4e-view-actions '("apply to net-next" . mu4e-apply-to-net-next) t)
+  (add-to-list 'mu4e-view-actions '("Open in a new buffer" . ed/preview-some-mail-at) t))
 
 (defun my-mu4e-contact-processor (contact)
   (cond
    ;; Remove prod.sim emails
    ;; e.g. Arthur Kiyanovski <issues+akiyano@prod.sim.a2z.com>
-   ((string-match "prod.sim.a2z.com" contact)
+   ;; Arthur Kiyanovski <issues+akiyano@prod.sim.a2z.com>
+   ;; (if (string-match-p "prod.sim.a2z.com" "Arthur Kiyanovski <issues+akiyano@prod.sim.a2z.com>") t nil)
+   ((string-match-p "prod.sim.a2z.com" contact)
     nil)
-   ((string-match "sameeh@daynix.com" contact)
+   ((string-match-p "sameeh@daynix.com" contact)
     nil)
-   ((string-match "sameehj@amazon.com" contact)
+   ((string-match-p "sameehj@amazon.com" contact)
     "\"Jubran Samih\" <sameehj@amazon.com>")
       ;; jonh smiht --> John Smith
-   ((string-match "agrosshay@gmail.com" contact)
+   ((string-match-p "agrosshay@gmail.com" contact)
     "Shay Agroskin <agrosshay@gmail.com>")
 
    (t contact)))
@@ -276,11 +280,6 @@ descendants."
 
 ;; (add-hook 'org-ctrl-c-ctrl-c-hook 'htmlize-and-send t)
 
-;; Add Org mode capture command
-(setq org-capture-templates
-      '(("t" "todo" entry (file+headline "~/todo.org" "Tasks")
-         "* TODO [#A] %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")))
-
 (defun bms/toggle-mu4e-gnus ()
   (interactive)
   "Toggle between old mu4e view mode and gnus-view-mode."
@@ -288,6 +287,35 @@ descendants."
       (setq mu4e-view-use-gnus nil)
     (setq mu4e-view-use-gnus t))
   (mu4e-view-refresh))
+
+;; View email in a new buffer
+(defun ed/preview-some-mail-at (msg)
+  (interactive)
+  (let ((path (mu4e-message-field msg :path)))
+    (call-process
+     "mu" nil
+     (switch-to-buffer (generate-new-buffer "*mail preview*") t)
+     t "view" (expand-file-name path)))
+  (with-current-buffer "*mail preview*"
+    (goto-char (point-min))
+    (mu4e~fontify-cited)
+    (mu4e~fontify-signature)
+    (while (re-search-forward "^\\(\\w+:\\) \\(.*\\)$" nil t)
+      (let ((key (match-string 1))
+            (value (match-string 2)))
+        (beginning-of-line)
+        (delete-region (point) (line-end-position))
+        (insert (concat (propertize key 'face 'mu4e-header-key-face) " "))
+        (if (or (equal key "From:")
+                (equal key "To:"))
+            (insert (propertize value 'face 'mu4e-special-header-value-face))
+          (insert (propertize value 'face 'mu4e-header-value-face)))))
+    (forward-line)
+    (beginning-of-line)
+    (insert "\n")
+    (read-only-mode)
+    (local-set-key (kbd "q") #'kill-this-buffer)))
+
 
 ;; Choose contacts using ivy-mode
 ;; (require 'mu4e-ivy-contacts)
@@ -298,7 +326,8 @@ descendants."
 	  (lambda()
 	    (local-set-key (kbd "J") (lambda ()
 				       (interactive)
-				       (mu4e-headers-mark-thread nil '(read))))
+				       (mu4e-headers-mark-thread nil '(read))
+				       (mu4e-mark-execute-all t)))
 	    (local-set-key (kbd "N") 'mu4e-goto-next-thread)
 	    (local-set-key (kbd "P") 'mu4e-goto-previous-thread)
 	    ))
@@ -309,7 +338,8 @@ descendants."
 (use-package helm-mu
   :ensure
   :config
-  (setq helm-mu-append-implicit-wildcard t))
+  (setq helm-mu-append-implicit-wildcard t)
+  (define-key mu4e-compose-mode-map (kbd "C-C c") 'helm-mu-contacts))
 
 (eval-after-load 'mu4e
   '(progn
@@ -328,20 +358,22 @@ descendants."
 (straight-use-package
  '(emacs-htmlize :type git :host github :repo "hniksic/emacs-htmlize"))
 ;; (straight-use-pacakge 'emacs-htmlize)
-(straight-use-package 'org-msg)
-(setq org-msg-options "html-postamble:nil H:5 num:nil ^:{} toc:nil author:nil email:nil \\n:t"
-      org-msg-startup "hidestars indent inlineimages"
-      org-msg-greeting-fmt "\nHi %s,\n\n"
-      org-msg-greeting-name-limit 3
-      org-msg-default-alternatives '(text html)
-      org-msg-convert-citation t
-      org-msg-signature "
+(use-package org-msg
+  :config
+  (setq org-msg-options "html-postamble:nil H:5 num:nil ^:{} toc:nil author:nil email:nil \\n:t"
+	org-msg-startup "hidestars indent inlineimages"
+	org-msg-greeting-fmt "\nHi,\n\n"
+	org-msg-greeting-name-limit 3
+	org-msg-default-alternatives '(text html)
+	org-msg-convert-citation t
+	org-msg-signature "
 
 Thanks,
 #+begin_signature
 Shay
-#+end_signature")
-(setq org-msg-convert-citation t)
+#+end_signature"))
+(define-key org-msg-edit-mode-map (kbd "C-C c") 'helm-mu-contacts)
+
 (org-msg-mode)
 
 ;; enable inline images
@@ -349,6 +381,39 @@ Shay
 ;; use imagemagick, if available
 (when (fboundp 'imagemagick-register-types)
   (imagemagick-register-types))
+
+(straight-use-package
+ '(message-view-patch :type git :host github :repo "seanfarley/message-view-patch"))
+(add-hook 'gnus-part-display-hook 'message-view-patch-highlight)
+
+;; Refiling capabilities (Gmail only for now)
+
+(defvar mu4e-find-new-messages-command-template
+  "mu find maildir:/gmail/ flag:unread %s --format=sexp 2>/dev/null")
+
+(defun refile-electricity-bill-emails ()
+  (let* ((cmd (format mu4e-find-new-messages-command-template "from:iec.co.il"))
+	 (res (concat "(list" (shell-command-to-string cmd) ")"))
+	 (msgs (car (read-from-string res))))
+    (unless (equal '(list) msgs)
+      (dolist (msg msgs)
+	(when-let ((docid (mu4e-message-field msg :docid))
+                   (maildir (funcall mu4e-refile-folder msg)))
+          (mu4e~proc-move docid maildir)))))
+  )
+
+(defun mu4e-refile-messages ()
+  (let* ((cmd mu4e-find-new-messages-command)
+         (res (concat "(list" (shell-command-to-string cmd) ")"))
+         (msgs (car (read-from-string res))))
+    (unless (equal '(list) msgs)
+      (dolist (msg msgs)
+        (when-let ((docid (mu4e-message-field msg :docid))
+                   (maildir (funcall mu4e-refile-folder msg)))
+          (mu4e~proc-move docid maildir))))))
+
+;; (add-to-list 'mu4e-index-updated-hook ')
+
 
 (provide 'init-email)
 ;;; init-email.el ends here
