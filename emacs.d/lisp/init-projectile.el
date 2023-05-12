@@ -10,7 +10,7 @@
 
 (projectile-global-mode)
 ;; (setq projectile-completion-system 'helm)
-(setq projectile-enable-caching t)
+;; (setq projectile-enable-caching nil)
 
 ;; (setq helm-ag-insert-at-point 'symbol)
 

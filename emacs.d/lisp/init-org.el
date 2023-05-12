@@ -18,7 +18,7 @@
 (defun shay_predicate_todos ()
   "list all paragraphs in current org buffer"
   (interactive)
-  
+
   (print (org-element-map (org-element-parse-buffer) 'item
 	   (lambda (item) (not (eq (org-element-property :todo-keyword (org-element-at-point)) nil))) )
 	 ))
@@ -76,11 +76,15 @@
 	 )
     )
 
+
 ;; (parse_todo_in_org "/tmp/test.org")
 
 ;; Org capture settings
 
-(setq org-capture-templates '())
+(setq org-capture-templates '()
+      ;; Export settings
+      org-export-with-sub-superscripts nil
+      org-export-with-toc nil)
 
 (add-to-list
  'org-capture-templates
@@ -158,14 +162,16 @@
 (global-set-key (kbd "<f9> c") 'calendar)
 (setq org-agenda-files '("~/workspace/org_tasks"))
 
-(setq org-agenda-custom-commands
-      (quote ((" " "Agenda"
-	       ((agenda "" nil)
-		(tags-todo "WAITING"
-			   ((org-agenda-overriding-header "Waiting tasks")))
-		(tags-todo "-WAITING"
-			   ((org-agenda-overriding-header "Future todos"))))
-	       nil))))
+;; TODO: This for some work no longer works since emacs doesn't
+;; recognize the command org-agenda-overriding-header
+;; (setq org-agenda-custom-commands
+      ;; (quote ((" " "Agenda"
+	       ;; ((agenda "" nil)
+		;; (tags-todo "WAITING"
+			   ;; ((org-agenda-overriding-header "Waiting tasks")))
+		;; (tags-todo "-WAITING"
+			   ;; ((org-agenda-overriding-header "Future todos"))))
+	       ;; nil))))
 
 ;; Compact the block agenda view
 (setq org-agenda-compact-blocks t)
@@ -201,6 +207,35 @@
                  finally do (defconst org-level-faces faces)
                  finally do (setq org-n-level-faces (length org-level-faces))))))
 
+
+(add-hook 'org-mode-hook 'flyspell-mode)
+
+;; Needed to export org mode to quip using markdown export as intermidiate
+(defun org-md-example-block (example-block _contents info)
+  "Transcode EXAMPLE-BLOCK element into Markdown format.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (concat "```\n"
+   (org-remove-indentation
+    (org-export-format-code-default example-block info))
+   "```"))
+
+(use-package plantuml-mode
+  :ensure)
+;; (setq plantuml-jar-path "/usr/share/plantuml/plantuml.jar")
+;; (setq org-plantuml-jar-path "/usr/share/plantuml/plantuml.jar")
+
+(setq plantuml-jar-path "~/workspace/Software/plantuml.jar")
+(setq org-plantuml-jar-path "~/workspace/Software/plantuml.jar")
+(setq plantuml-default-exec-mode 'jar)
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((plantuml . t))) ; this line activates plantuml
+
+;; don't ask for confirmation before evaluating code blocks
+(setq org-confirm-babel-evaluate nil)
+
+
 ;; (defface org-level-0 `((t :inherit 'variable-pitch))
   ;; (format "Face for Org level %s headings." 0))
 ;; (set-face-attribute (intern  "org-level-0") nil
@@ -217,7 +252,7 @@
 ;; (cl-loop for buf in (buffer-list)
          ;; collect (buffer-file-name buf))
 
-(set-face-attribute 'org-agenda-overidden-header nil :foreground "red")
+;; (set-face-attribute 'org-agenda-overidden-header nil :foreground "red")
 
 (provide 'init-org)
 

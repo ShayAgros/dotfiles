@@ -3,14 +3,15 @@
 get_ssh_connection() {
 	pane_pid=${1}
 
-	ssh_login=$(ps -o command= -g ${pane_pid} | awk '/^ssh/ {print $NF ; exit 0 }')
+	ssh_command=$(ps -o command= -g ${pane_pid} | awk '/^ssh/ {print $0 ; exit 0 }')
 
-	if [[ -z ${ssh_login} ]]; then
-		return
-	fi
+	[[ -z ${ssh_command} ]] && return
 
-	ssh_login=$(echo ${ssh_login} | sed 's/[^@]\+@\([^@]\+\)/\1/')
-	ssh_entry=$(awk "/\y${ssh_login}\y/ {print NR}" ~/saved_instances/saved_logins)
+	# -G flag would cause alias to be resolved
+	ssh_hostname=$(eval ${ssh_command} -G)
+	ssh_hostname=$(echo "${ssh_hostname}" | awk '/^hostname/ {print $2}')
+
+	ssh_entry=$(awk "/\y${ssh_hostname}\y/ {print NR}" ~/saved_instances/saved_logins)
 
 	if [[ -n ${ssh_entry} ]]; then
 		echo ${ssh_entry}

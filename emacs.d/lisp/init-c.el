@@ -34,7 +34,7 @@
   (define-key helm-gtags-mode-map (kbd "C-c g a") 'helm-gtags-tags-in-this-function)
   (define-key helm-gtags-mode-map (kbd "C-j") 'helm-gtags-select)
   (define-key helm-gtags-mode-map (kbd "M-.") 'helm-gtags-dwim)
-  (define-key helm-gtags-mode-map (kbd "M-,") 'helm-gtags-pop-stack)
+  ;; (define-key helm-gtags-mode-map (kbd "M-,") 'helm-gtags-pop-stack)
   (define-key helm-gtags-mode-map (kbd "C-c <") 'helm-gtags-previous-history)
   (define-key helm-gtags-mode-map (kbd "C-c >") 'helm-gtags-next-history)
   :hook (
@@ -45,35 +45,16 @@
 	 )
 )
 
-;; (remove-hook 'python-mode-hook 'wisent-python-default-setup)
-
-;; (require 'cc-mode)
-;; (require 'semantic)
-;; (global-semanticdb-minor-mode 1)
-;; (global-semantic-idle-scheduler-mode 1)
-
-;; (semantic-mode 1)
-
-(setq ede-custom-file (expand-file-name "cc-mode-projects.el" user-emacs-directory))
-(when (file-exists-p ede-custom-file)
-  (load ede-custom-file))
-
 (defun company-c-headers-setup ()
   (add-to-list 'company-backends 'company-c-headers))
 
 (setq c-default-style "linux"
           c-basic-offset 8)
 
-;; Configure LSP client (CCLS)
 (use-package lsp-mode :commands lsp)
+
 (use-package lsp-ui :commands lsp-ui-mode)
 (use-package company-lsp :commands company-lsp)
-
-(use-package ccls
-  :hook ((c-mode c++-mode objc-mode cuda-mode) .
-         (lambda () (require 'ccls) (lsp))))
-
-(setq ccls-executable "~/workspace/scripts/ccls_execute.sh")
 
 ;; From the Linux coding style document. It should make emacs work
 ;; nicer with kernel's files
@@ -97,25 +78,38 @@
                          c-lineup-gcc-asm-reg
                          c-lineup-arglist-tabs-only))))))
 
-(add-hook 'c-mode-hook
-          (lambda ()
-            (let ((filename (buffer-file-name)))
-              ;; Enable kernel mode for the appropriate files
-              (when (and filename
-                         (string-match (expand-file-name "~/src/linux-trees")
-                                       filename))
-                (setq indent-tabs-mode t)
-                (setq show-trailing-whitespace t)
-                (c-set-style "linux-tabs-only"))
-	      ;; CEDET (emacs native support for C projects). This currently doesn't work well with LSP
-	      ;; You need to either choose between them of find a way to integrate both
-	      (global-ede-mode))))
+(add-hook 'c-mode-common-hook
+	  (lambda () 
+	    (define-key c-mode-map (kbd "M-n") #'flymake-goto-next-error)
+	    (define-key c-mode-map (kbd "M-p") #'flymake-goto-prev-error)
+	    (define-key c-mode-map (kbd "M-,") #'xref-pop-marker-stack)))
+
+;; CEDET doesn't necessarily works with LSP mode. Need to better understand which
+;; tools you lack
+
+;; (setq ede-custom-file (expand-file-name "cc-mode-projects.el" user-emacs-directory))
+;; (when (file-exists-p ede-custom-file)
+;;   (load ede-custom-file))
+
+;; (add-hook 'c-mode-hook
+;;           (lambda ()
+;;             (let ((filename (buffer-file-name)))
+;;               ;; Enable kernel mode for the appropriate files
+;;               (when (and filename
+;;                          (string-match (expand-file-name "~/src/linux-trees")
+;;                                        filename))
+;;                 (setq indent-tabs-mode t)
+;;                 (setq show-trailing-whitespace t)
+;;                 (c-set-style "linux-tabs-only"))
+;; 	      ;; CEDET (emacs native support for C projects). This currently doesn't work well with LSP
+;; 	      ;; You need to either choose between them of find a way to integrate both
+;; 	      (global-ede-mode))))
 
 ;; remap ede key bidning to C-c e since C-c . is already used by org mode, and it is a headache to
 ;; make it work for each mode
-(with-eval-after-load 'ede
-  (define-key ede-minor-mode-map (kbd "C-c e")
-    (lookup-key ede-minor-mode-map (kbd "C-c .")))
-  (define-key ede-minor-mode-map (kbd "C-c .") nil))
+;; (with-eval-after-load 'ede
+;;   (define-key ede-minor-mode-map (kbd "C-c e")
+;;     (lookup-key ede-minor-mode-map (kbd "C-c .")))
+;;   (define-key ede-minor-mode-map (kbd "C-c .") nil))
 
 (provide 'init-c)
