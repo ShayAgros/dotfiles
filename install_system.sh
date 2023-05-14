@@ -2,6 +2,7 @@
 
 export SOFTWARE_DIR=~/workspace/software
 export DOTS_DIR=`pwd`
+export BIN_INSTALL_DIR=/usr/local/bin
 
 function install_deps() {
 	if which apt-get > /dev/null &&
@@ -13,7 +14,7 @@ function install_deps() {
 	return 0
 }
 
-function install_componenet() {
+function configure_component() {
 	comp=$1
 
 	# if we were asked to install specific componenets, skip all
@@ -32,7 +33,41 @@ function install_componenet() {
 	# with components' envars
 	(
 		source ${comp_file}
-		
-		
+
+		if [[ $(type -t check_if_installed) == function ]] &&
+		   check_if_installed ; then
+			echo "Component ${comp} is installed - skipping"
+				return 0
+		fi
+
+		echo "===================== Installing ${comp} ====================="
+
+		if [[ -n ${DEPS_APT} ]]; then
+			echo "------ Installing dependencies ------"
+			install_deps
+		fi
+
+		if [[ $(type -t install_component) == function ]] &&
+			# break configuration if we failed a step
+			set -e
+			install_component
+			set +e
+		fi
 	)
+
+	return 0
 }
+
+trap "Failed to install component ${comp}" ERR
+
+configure_component deps
+configure_component amazon_apt
+configure_component font
+configure_component zsh
+configure_component kitty
+configure_component neovim
+configure_component awesomewm
+configure_component lua-language-server
+configure_component node
+configure_component tmux
+configure_component playerctl
