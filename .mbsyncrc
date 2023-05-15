@@ -1,0 +1,94 @@
+IMAPAccount davmail
+Host 127.0.0.1
+Port 1143
+User shayagr
+#PassCmd "gpg -q --for-your-eyes-only --no-tty -d ~/.emacs.d/.mbsyncpass.gpg | sed -n '2p'"
+PassCmd "cat -"
+SSLType None
+AuthMechs LOGIN
+
+IMAPAccount exchange
+Host ballard.amazon.com
+Port 1993
+User shayagr
+PassCmd "cat -"
+#PassCmd "gpg -q --for-your-eyes-only --no-tty -d ~/.emacs.d/.mbsyncpass.gpg | sed -n '2p'"
+SSLType IMAPS
+CertificateFile /etc/ssl/certs/ca-certificates.crt
+
+IMAPStore davmail-remote
+Account exchange
+PathDelimiter "/"
+
+MaildirStore amazon-local
+Path ~/workspace/Mail/amazon/
+Inbox ~/workspace/Mail/amazon/inbox/
+SubFolders Verbatim
+
+Channel sync-inbox
+Master :davmail-remote:
+Slave :amazon-local:
+Pattern INBOX
+Create Slave
+Expunge Master
+Remove Master
+Sync Push PullNew PullReNew PullFlags
+SyncState *
+
+Channel sync-amazon-code
+Master :davmail-remote:
+Slave :amazon-local:
+Pattern mailing_lists/*
+Create Slave
+Expunge Master
+Remove Master
+Sync Push PullNew PullReNew
+SyncState *
+
+Channel sync-amazon-backlog
+Master :davmail-remote:
+Slave :amazon-local:
+Pattern past* Corp* group*
+Create Slave
+Expunge Master
+Remove Master
+Sync Push PullNew PullReNew
+SyncState *
+
+Channel sync-sent
+Master :davmail-remote:"Sent"
+Slave :amazon-local:sent
+Expunge Master
+Remove Master
+Sync All
+SyncState *
+
+Group amazon
+Channel sync-inbox
+#Channel sync-sent
+Channel sync-amazon-code
+
+IMAPAccount gmail
+Host imap.gmail.com
+User agrosshay@gmail.com
+#PassCmd "gpg -q --for-your-eyes-only --no-tty -d ~/.emacs.d/.mbsyncpass.gpg | sed -n '4p'"
+PassCmd "cat -"
+SSLType IMAPS
+CertificateFile /etc/ssl/certs/ca-certificates.crt
+PipelineDepth 100
+
+IMAPStore gmail-remote
+Account gmail
+
+MaildirStore gmail-local
+Path ~/workspace/Mail/gmail/
+Inbox ~/workspace/Mail/gmail/INBOX
+SubFolders Verbatim
+
+Channel gmail
+Master :gmail-remote:
+Slave :gmail-local:
+Patterns * ![Gmail]*
+SyncState *
+Create Slave
+Sync Push PullNew PullReNew PullFlags
