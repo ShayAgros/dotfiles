@@ -37,29 +37,6 @@ alias vim=nvim
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-
-#export PATH="/Users/shayagr/.pyenv/bin:$PATH"
-#eval "$(pyenv init -)"
-#eval "$(pyenv virtualenv-init -)"
-
 # jump over dots as well when traversing words
 export WORDCHARS=.
 
@@ -293,14 +270,6 @@ alias ls="ls -t --color"
 
 export PATH=$HOME/.toolbox/bin:$PATH
 
-export WORKON_HOME=~/.local/envs
-export VIRTUALENVWRAPPER_PYTHON=`which python3`
-source /usr/local/bin/virtualenvwrapper.sh
-
-export PATH=$HOME/.toolbox/bin:$PATH
-export PATH=~/workspace/Software/node/node-v18.15.0-linux-x64/bin:$PATH
-export PATH=/home/ANT.AMAZON.COM/shayagr/go/bin:$PATH
-
 # add clangd to path
 export PATH=/home/ANT.AMAZON.COM/shayagr/workspace/Software/clangd/clangd_14.0.0/bin:$PATH
 
@@ -309,32 +278,9 @@ alias bb=brazil-build
 # gerrit website directory
 export GERRIT_SITE=~/workspace/gerrit_testsite
 
-# Configure Lua
-#export PATH=${PATH}:/opt/carbon/bin/
-#export LUA_PATH='/usr/share/lua/5.3/?/init.lua;/usr/share/lua/5.3/?.lua;/home/ANT.AMAZON.COM/shayagr/workspace/Software/luarocks/luarocks-3.8.0/./lua_modules/share/lua/5.3/?.lua;/home/ANT.AMAZON.COM/shayagr/workspace/Software/luarocks/luarocks-3.8.0/./lua_modules/share/lua/5.3/?/init.lua;/home/ANT.AMAZON.COM/shayagr/.local/share/lua/5.3/?.lua;/home/ANT.AMAZON.COM/shayagr/.luarocks/share/lua/5.3/?.lua;/home/ANT.AMAZON.COM/shayagr/.luarocks/share/lua/5.3/?/init.lua;/usr/local/share/lua/5.3/?.lua;/usr/local/share/lua/5.3/?/init.lua;/usr/local/lib/lua/5.3/?.lua;/usr/local/lib/lua/5.3/?/init.lua;/usr/share/lua/5.3/?.lua;/usr/share/lua/5.3/?/init.lua;./?.lua;./?/init.lua;/opt/carbon/share/lua/5.3/?.lua;/home/ANT.AMAZON.COM/shayagr/.local/share/lua/5.3/?/init.lua;'${LUA_PATH}
-#export LUA_CPATH='/usr/lib/x86_64-linux-gnu/lib?.so;/home/ANT.AMAZON.COM/shayagr/workspace/Software/luarocks/luarocks-3.8.0/./lua_modules/lib/lua/5.3/?.so;/home/ANT.AMAZON.COM/shayagr/.luarocks/share/lua/5.3/?.lua;/home/ANT.AMAZON.COM/shayagr/.luarocks/share/lua/5.3/?/init.lua;/usr/local/share/lua/5.3/?.lua;/usr/local/share/lua/5.3/?/init.lua;/usr/local/lib/lua/5.3/?.lua;/usr/local/lib/lua/5.3/?/init.lua;/usr/share/lua/5.3/?.lua;/usr/share/lua/5.3/?/init.lua;./?.lua;./?/init.lua;/opt/carbon/share/lua/5.3/?.lua;/opt/carbon/lib/lua/5.3/?.so;/home/ANT.AMAZON.COM/shayagr/.luarocks/lib/lua/5.3/?.so;/home/ANT.AMAZON.COM/shayagr/.local/lib/lua/5.3/?.so;'${LUA_CPATH}
-#export PATH='/home/ANT.AMAZON.COM/shayagr/workspace/Software/luarocks/luarocks-3.8.0/./lua_modules/bin:/home/ANT.AMAZON.COM/shayagr/.luarocks/bin:'${PATH}
-#export LUA_PATH="${LUA_PATH};/opt/carbon/share/lua/5.3/?.lua"
-#export LUA_CPATH="${LUA_CPATH};/opt/carbon/lib/lua/5.3/?.so"
-
-#export LUA=/usr/include/lua5.3
-#export LUAINC=/usr/include/lua5.3
-#export LUALIB=/usr/lib/x86_64-linux-gnu
-#export LUABIN=/usr/bin
-
-export PATH="/usr/local/opt/node@14/bin:$PATH"
 # gp-hackcess setup
 source /home/ANT.AMAZON.COM/shayagr/.gph-setup
 
 export KERNEL_BUILD_DIR=~/linux
 
-PATH="/home/ANT.AMAZON.COM/shayagr/perl5/bin${PATH:+:${PATH}}"; export PATH;
-PERL5LIB="/home/ANT.AMAZON.COM/shayagr/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
-PERL_LOCAL_LIB_ROOT="/home/ANT.AMAZON.COM/shayagr/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
-PERL_MB_OPT="--install_base \"/home/ANT.AMAZON.COM/shayagr/perl5\""; export PERL_MB_OPT;
-PERL_MM_OPT="INSTALL_BASE=/home/ANT.AMAZON.COM/shayagr/perl5"; export PERL_MM_OPT;
-
 alias luamake=/home/ANT.AMAZON.COM/shayagr/workspace/Software/lua-language-server/3rd/luamake/luamake
-
-# add lua language server to path
-export PATH="/home/ANT.AMAZON.COM/shayagr/workspace/Software/lua-language-server/bin:${PATH}"

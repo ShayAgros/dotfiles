@@ -1,4 +1,4 @@
-#!/usr/bin/env
+#!/usr/bin/env bash
 
 export SOFTWARE_DIR=~/workspace/software
 export DOTS_DIR=`pwd`
@@ -24,9 +24,10 @@ function configure_component() {
 		return 0
 	fi
 
-	comp_file="./componenets/${comp}.sh"
+	comp_file="./components/${comp}.sh"
 	if [[ ! -f ${comp_file} ]]; then
 		echo "ERROR: requested to install componenet ${comp}, but no ${comp_file} file was found"
+		return 2
 	fi
 
 	# Install a componenet in a subshell to not clutter current environment
@@ -47,7 +48,7 @@ function configure_component() {
 			install_deps
 		fi
 
-		if [[ $(type -t install_component) == function ]] &&
+		if [[ $(type -t install_component) == function ]]; then
 			# break configuration if we failed a step
 			set -e
 			install_component
@@ -58,7 +59,7 @@ function configure_component() {
 	return 0
 }
 
-trap "Failed to install component ${comp}" ERR
+trap "echo Failed to install component ${comp} ; exit 2" ERR
 
 configure_component deps
 configure_component amazon_apt
@@ -71,3 +72,7 @@ configure_component lua-language-server
 configure_component node
 configure_component tmux
 configure_component playerctl
+configure_component python # depends on oh-my-zsh
+configure_component emacs
+configure_component mu4e # depends on emacs
+configure_component mbsync

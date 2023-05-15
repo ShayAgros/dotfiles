@@ -1,7 +1,7 @@
 DEPS_APT=""
 
 function check_if_installed() {
-	if [[ -d ~/.local/share/fonts/firacode ]]
+	if [[ -d ~/.local/share/fonts/firacode ]]; then
 		return 0
 	fi
 
