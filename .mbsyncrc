@@ -4,7 +4,7 @@ Port 1143
 User shayagr
 #PassCmd "gpg -q --for-your-eyes-only --no-tty -d ~/.emacs.d/.mbsyncpass.gpg | sed -n '2p'"
 PassCmd "cat -"
-SSLType None
+TLSType None
 AuthMechs LOGIN
 
 IMAPAccount exchange
@@ -13,7 +13,7 @@ Port 1993
 User shayagr
 PassCmd "cat -"
 #PassCmd "gpg -q --for-your-eyes-only --no-tty -d ~/.emacs.d/.mbsyncpass.gpg | sed -n '2p'"
-SSLType IMAPS
+TLSType IMAPS
 CertificateFile /etc/ssl/certs/ca-certificates.crt
 
 IMAPStore davmail-remote
@@ -21,45 +21,45 @@ Account exchange
 PathDelimiter "/"
 
 MaildirStore amazon-local
-Path ~/workspace/Mail/amazon/
-Inbox ~/workspace/Mail/amazon/inbox/
+Path ~/workspace/mail/amazon/
+Inbox ~/workspace/mail/amazon/inbox/
 SubFolders Verbatim
 
 Channel sync-inbox
-Master :davmail-remote:
-Slave :amazon-local:
+Far :davmail-remote:
+Near :amazon-local:
 Pattern INBOX
-Create Slave
-Expunge Master
-Remove Master
-Sync Push PullNew PullReNew PullFlags
+Create Near
+Expunge Far
+Remove Far
+Sync Push PullNew PullUpgrade PullFlags
 SyncState *
 
 Channel sync-amazon-code
-Master :davmail-remote:
-Slave :amazon-local:
+Far :davmail-remote:
+Near :amazon-local:
 Pattern mailing_lists/*
-Create Slave
-Expunge Master
-Remove Master
-Sync Push PullNew PullReNew
+Create Near
+Expunge Far
+Remove Far
+Sync Push PullNew PullUpgrade
 SyncState *
 
 Channel sync-amazon-backlog
-Master :davmail-remote:
-Slave :amazon-local:
+Far :davmail-remote:
+Near :amazon-local:
 Pattern past* Corp* group*
-Create Slave
-Expunge Master
-Remove Master
-Sync Push PullNew PullReNew
+Create Near
+Expunge Far
+Remove Far
+Sync Push PullNew PullUpgrade
 SyncState *
 
 Channel sync-sent
-Master :davmail-remote:"Sent"
-Slave :amazon-local:sent
-Expunge Master
-Remove Master
+Far :davmail-remote:"Sent"
+Near :amazon-local:sent
+Expunge Far
+Remove Far
 Sync All
 SyncState *
 
@@ -73,7 +73,7 @@ Host imap.gmail.com
 User agrosshay@gmail.com
 #PassCmd "gpg -q --for-your-eyes-only --no-tty -d ~/.emacs.d/.mbsyncpass.gpg | sed -n '4p'"
 PassCmd "cat -"
-SSLType IMAPS
+TLSType IMAPS
 CertificateFile /etc/ssl/certs/ca-certificates.crt
 PipelineDepth 100
 
@@ -81,14 +81,14 @@ IMAPStore gmail-remote
 Account gmail
 
 MaildirStore gmail-local
-Path ~/workspace/Mail/gmail/
-Inbox ~/workspace/Mail/gmail/INBOX
+Path ~/workspace/mail/gmail/
+Inbox ~/workspace/mail/gmail/INBOX
 SubFolders Verbatim
 
 Channel gmail
-Master :gmail-remote:
-Slave :gmail-local:
+Far :gmail-remote:
+Near :gmail-local:
 Patterns * ![Gmail]*
 SyncState *
-Create Slave
-Sync Push PullNew PullReNew PullFlags
+Create Near
+Sync Push PullNew PullUpgrade PullFlags
