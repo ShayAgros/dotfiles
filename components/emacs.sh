@@ -27,5 +27,7 @@ function install_component() {
 				--with-cairo --with-cairo --with-xwidgets --with-x-toolkit=gtk3
 	make -j`nproc`
 
+	ln -s ${DOTS_DIR}/emacs.d ~/.emacs.d
+
 	return 0
 }

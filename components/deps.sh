@@ -2,6 +2,8 @@ DEPS_APT="gcc make autoconf automake pkg-config zlib1g-dev curl python3-pip
 		  cpanminus perl build-essential libncurses-dev libgnutls28-dev xclip
 		  silversearcher-ag vlc pavucontrol flameshot ethtool bear flex bison htop arandr
 		  fzf clang rofi"
+# for Linux kernel compilation
+DEPS_APT+=" libssl-dev libelf-dev"
 DEPS_APT=$(echo $DEPS_APT | xargs)
 
 function check_if_installed() {

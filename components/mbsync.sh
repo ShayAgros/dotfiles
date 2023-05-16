@@ -1,4 +1,4 @@
-DEPS_APT=""
+DEPS_APT="libsasl2-dev"
 
 function check_if_installed() {
 	if which mbsync >/dev/null ; then
@@ -24,6 +24,8 @@ function install_component() {
 	mkdir ~/workspace/mail
 	mkdir ~/workspace/mail/gmail
 	mkdir ~/workspace/mail/amazon
+
+	ln -s ${DOTS_DIR}/.mbsyncrc ~/.mbsyncrc
 
 	return 0
 }
