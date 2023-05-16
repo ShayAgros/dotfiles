@@ -148,7 +148,7 @@ with fewer search terms"
    (t contact)))
 
 ;; This was installed from source, not the package manager
-(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
+(add-to-list 'load-path "/home/ANT.AMAZON.COM/shayagr/workspace/software/mu/build/mu4e")
 (require 'mu4e)
 
 (configure-mu4e-basic)
